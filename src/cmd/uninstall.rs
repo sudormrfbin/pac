@@ -31,12 +31,11 @@ pub fn exec(matches: &ArgMatches) {
 /// purges related plugin specific config file.
 fn uninstall_plugins(plugins: &[String], all: bool) -> Result<()> {
     let mut packs = package::fetch()?;
-    let mut packs_iter = packs.iter();
 
     let to_uninstall = plugins
         .iter()
         .map(
-            |plugin| match packs_iter.find(|pack| &pack.name == plugin) {
+            |plugin| match packs.iter().find(|pack| &pack.name == plugin) {
                 Some(p) => Ok(p),
                 None => Err(Error::plugin_not_installed(plugin)),
             },
