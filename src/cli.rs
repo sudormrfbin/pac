@@ -135,6 +135,11 @@ pub fn build_cli() -> App<'static, 'static> {
                 ),
         )
         .subcommand(
+            SubCommand::with_name("generate")
+                .about("Generate the pack package file")
+                .help("Generate _pack.vim file which combines all package configurations"),
+        )
+        .subcommand(
             SubCommand::with_name("completions")
                 .about("Generates completion scripts for your shell")
                 .setting(AppSettings::Hidden)
