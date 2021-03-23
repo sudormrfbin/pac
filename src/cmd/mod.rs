@@ -1,4 +1,3 @@
-pub mod config;
 pub mod generate;
 pub mod install;
 pub mod list;

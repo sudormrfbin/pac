@@ -7,14 +7,12 @@ use std::fs;
 #[derive(Debug)]
 struct UninstallArgs {
     plugins: Vec<String>,
-    all: bool,
 }
 
 impl UninstallArgs {
     fn from_matches(m: &ArgMatches) -> UninstallArgs {
         UninstallArgs {
             plugins: m.values_of_lossy("package").unwrap_or_else(|| vec![]),
-            all: m.is_present("all"),
         }
     }
 }
@@ -22,14 +20,13 @@ impl UninstallArgs {
 pub fn exec(matches: &ArgMatches) {
     let args = UninstallArgs::from_matches(matches);
 
-    if let Err(e) = uninstall_plugins(&args.plugins, args.all) {
+    if let Err(e) = uninstall_plugins(&args.plugins) {
         die!("{}", e);
     }
 }
 
-/// Uninstall multiple plugins based on plugin names. `all` argument
-/// purges related plugin specific config file.
-fn uninstall_plugins(plugins: &[String], all: bool) -> Result<()> {
+/// Uninstall multiple plugins based on plugin names.
+fn uninstall_plugins(plugins: &[String]) -> Result<()> {
     let mut packs = package::fetch()?;
 
     let to_uninstall = plugins
@@ -43,7 +40,7 @@ fn uninstall_plugins(plugins: &[String], all: bool) -> Result<()> {
         .collect::<Result<Vec<&Package>>>()?;
 
     for pack in to_uninstall {
-        uninstall_plugin(pack, all)?;
+        uninstall_plugin(pack)?;
     }
 
     packs.retain(|x| !plugins.contains(&x.name)); // keep only installed plugins
@@ -56,14 +53,9 @@ fn uninstall_plugins(plugins: &[String], all: bool) -> Result<()> {
     Ok(())
 }
 
-/// Uninstall a specific plugin. `all` purges related config file.
-fn uninstall_plugin(plugin: &Package, all: bool) -> Result<()> {
-    let config_file = plugin.config_path();
+/// Uninstall a specific plugin.
+fn uninstall_plugin(plugin: &Package) -> Result<()> {
     let plugin_path = plugin.path();
-
-    if config_file.is_file() && all {
-        fs::remove_file(&config_file)?;
-    }
 
     if plugin_path.is_dir() {
         fs::remove_dir_all(&plugin_path)?;

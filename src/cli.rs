@@ -89,24 +89,7 @@ pub fn build_cli() -> App<'static, 'static> {
         .subcommand(
             SubCommand::with_name("uninstall")
                 .about("Uninstall packages/plugins")
-                .arg(
-                    Arg::with_name("all")
-                        .short("a")
-                        .long("all")
-                        .help("remove all package related configuration as well"),
-                )
                 .arg(Arg::with_name("package").required(true).multiple(true)),
-        )
-        .subcommand(
-            SubCommand::with_name("config")
-                .about("Configure/edit the package specific configuration")
-                .arg(
-                    Arg::with_name("delete")
-                        .short("d")
-                        .long("delete")
-                        .help("Delete package configuration file"),
-                )
-                .arg(Arg::with_name("package").required(true)),
         )
         .subcommand(
             SubCommand::with_name("move")
@@ -140,12 +123,6 @@ pub fn build_cli() -> App<'static, 'static> {
                         .help("Skip packages"),
                 )
                 .arg(
-                    Arg::with_name("packfile")
-                        .short("p")
-                        .long("packfile")
-                        .help("Regenerate the '_pack' file (combine all package configurations)"),
-                )
-                .arg(
                     Arg::with_name("threads")
                         .short("j")
                         .long("threads")
@@ -156,11 +133,6 @@ pub fn build_cli() -> App<'static, 'static> {
                         .help("Packages to update, default all")
                         .multiple(true),
                 ),
-        )
-        .subcommand(
-            SubCommand::with_name("generate")
-                .about("Generate the pack package file")
-                .help("Generate _pack.vim file which combines all package configurations"),
         )
         .subcommand(
             SubCommand::with_name("completions")

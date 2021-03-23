@@ -27,7 +27,6 @@ fn main() {
         ("list", Some(m)) => cmd::list::exec(m),
         ("install", Some(m)) => cmd::install::exec(m),
         ("uninstall", Some(m)) => cmd::uninstall::exec(m),
-        ("config", Some(m)) => cmd::config::exec(m),
         ("move", Some(m)) => cmd::move_cmd::exec(m),
         ("update", Some(m)) => cmd::update::exec(m),
         ("generate", Some(m)) => cmd::generate::exec(m),

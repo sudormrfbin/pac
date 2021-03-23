@@ -7,6 +7,9 @@
 ### Added
 - This changelog ;)
 
+### Removed
+- Per plugin configuration and related features have been removed. Use vimrc for plugin configuration.
+
 ### Changed
 - Complete package names where applicable for fish shell
 - Fail visibly for invalid package names when uninstalling

@@ -184,21 +184,6 @@ impl Package {
         }
     }
 
-    /// Returns vim config file path (under `PACK_CONFIG_DIR`) for this package
-    pub fn config_path(&self) -> PathBuf {
-        let name = if self.local {
-            self.basename().to_string()
-        } else {
-            self.name.replace("/", "-")
-        };
-        let fname = if name.ends_with(".vim") {
-            name
-        } else {
-            format!("{}.vim", &name)
-        };
-        PACK_CONFIG_DIR.join(fname)
-    }
-
     /// Returns (username, repo) for remote packages
     pub fn repo(&self) -> (&str, &str) {
         let mut info: Vec<&str> = self.name.splitn(2, '/').collect();
@@ -317,7 +302,7 @@ pub fn update_pack_plugin(packs: &[Package]) -> Result<()> {
     f.write_all(format!("{}\n\n", PLUGIN_HEADER).as_bytes())?;
 
     let mut buf = String::new();
-    for (p, path) in packs.iter().map(|x| (x, x.config_path())) {
+    for p in packs.iter() {
         buf.clear();
         let mut written = false;
 
@@ -337,7 +322,6 @@ pub fn update_pack_plugin(packs: &[Package]) -> Result<()> {
         if !p.for_types.is_empty() {
             if !written {
                 f.write_all(format!("\" {}\n", &p.name).as_bytes())?;
-                written = true;
             }
             let (_, repo) = p.repo();
             let msg = format!(
@@ -346,14 +330,6 @@ pub fn update_pack_plugin(packs: &[Package]) -> Result<()> {
                 repo
             );
             f.write_all(msg.as_bytes())?;
-        }
-
-        if path.is_file() {
-            File::open(&path)?.read_to_string(&mut buf)?;
-            if !written {
-                f.write_all(format!("\" {}\n", &p.name).as_bytes())?;
-            }
-            f.write_all(format!("{}\n", &buf).as_bytes())?;
         }
     }
     Ok(())
