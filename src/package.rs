@@ -301,35 +301,30 @@ pub fn update_pack_plugin(packs: &[Package]) -> Result<()> {
     let mut f = File::create(PACK_PLUGIN_DIR.join(PACK_PLUGIN_FILE))?;
     f.write_all(format!("{}\n\n", PLUGIN_HEADER).as_bytes())?;
 
-    let mut buf = String::new();
+    let mut plug_setup = String::new();
     for p in packs.iter() {
-        buf.clear();
-        let mut written = false;
-
         if let Some(ref c) = p.load_command {
-            f.write_all(format!("\" {}\n", &p.name).as_bytes())?;
-            written = true;
-            let (_, repo) = p.repo();
-            let msg = format!(
+            plug_setup += &format!(
                 "command! -nargs=* -range -bang {cmd} packadd {repo} | \
                  call s:do_cmd('{cmd}', \"<bang>\", <line1>, <line2>, <q-args>)\n\n",
                 cmd = c,
-                repo = repo
+                repo = p.repo().1,
             );
-            f.write_all(msg.as_bytes())?;
         }
 
         if !p.for_types.is_empty() {
-            if !written {
-                f.write_all(format!("\" {}\n", &p.name).as_bytes())?;
-            }
-            let (_, repo) = p.repo();
-            let msg = format!(
+            plug_setup += &format!(
                 "autocmd FileType {} packadd {}\n\n",
                 p.for_types.join(","),
-                repo
+                p.repo().1,
             );
-            f.write_all(msg.as_bytes())?;
+        }
+
+        if !plug_setup.is_empty() {
+            plug_setup = format!("\" {}\n", &p.name) + &plug_setup;
+            f.write_all(plug_setup.as_bytes())?;
+
+            plug_setup.clear();
         }
     }
     Ok(())
