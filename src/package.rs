@@ -165,8 +165,7 @@ impl Package {
         Path::new(&self.name)
             .file_name()
             .iter()
-            .filter_map(|e| e.to_str())
-            .next()
+            .find_map(|e| e.to_str())
             .unwrap_or("")
     }
 
