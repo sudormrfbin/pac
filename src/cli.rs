@@ -54,12 +54,6 @@ pub fn build_cli() -> App<'static, 'static> {
                         .value_name("CATEGORY"),
                 )
                 .arg(
-                    Arg::with_name("local")
-                        .short("l")
-                        .long("local")
-                        .help("Install local plugins"),
-                )
-                .arg(
                     Arg::with_name("on")
                         .long("on")
                         .help("Command for loading the plugins")

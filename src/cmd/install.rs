@@ -5,13 +5,10 @@ use crate::{Error, Result};
 
 use clap::{value_t, ArgMatches};
 use num_cpus;
-use std::os::unix::fs::symlink;
-use std::path::Path;
 
 #[derive(Debug)]
 struct InstallArgs {
     plugins: Vec<String>,
-    local: bool,
     on: Option<String>,
     for_: Option<String>,
     threads: Option<usize>,
@@ -24,7 +21,6 @@ impl InstallArgs {
     fn from_matches(m: &ArgMatches) -> InstallArgs {
         InstallArgs {
             plugins: m.values_of_lossy("package").unwrap_or_else(|| vec![]),
-            local: m.is_present("local"),
             on: value_t!(m, "on", String).ok(),
             for_: value_t!(m, "for", String).ok(),
             threads: value_t!(m, "threads", usize).ok(),
@@ -43,7 +39,6 @@ struct Plugins {
     types: Option<Vec<String>>,
     build: Option<String>,
     threads: usize,
-    local: bool,
 }
 
 pub fn exec(matches: &ArgMatches) {
@@ -71,7 +66,6 @@ pub fn exec(matches: &ArgMatches) {
         types,
         build: args.build,
         threads,
-        local: args.local,
     };
 
     if let Err(e) = install_plugins(&plugins) {
@@ -91,11 +85,6 @@ fn install_plugins(plugins: &Plugins) -> Result<()> {
         } else {
             let targets = plugins.names.iter().map(|n| {
                 let mut p = Package::new(n, &plugins.category, plugins.opt);
-                p.local = if Path::new(n).is_dir() {
-                    true
-                } else {
-                    plugins.local
-                };
                 if let Some(ref c) = plugins.on {
                     p.set_load_command(c);
                 }
@@ -157,14 +146,6 @@ fn do_install(pack: &Package) -> Result<()> {
     let path = pack.path();
     if path.is_dir() {
         Err(Error::plugin_installed(&path))
-    } else if pack.local {
-        let src = Path::new(&pack.name);
-        if !src.is_dir() {
-            Err(Error::NoPlugin)
-        } else {
-            symlink(&src, &path)?;
-            Ok(())
-        }
     } else {
         git::clone(&pack.name, &path)
     }

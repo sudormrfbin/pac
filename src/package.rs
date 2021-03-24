@@ -54,8 +54,6 @@ pub struct Package {
     pub for_types: Vec<String>,
     /// Build command for this package
     pub build_command: Option<String>,
-    /// Local plugin
-    pub local: bool,
 }
 
 impl Package {
@@ -67,7 +65,6 @@ impl Package {
             load_command: None,
             for_types: Vec::new(),
             build_command: None,
-            local: false,
         }
     }
 
@@ -111,7 +108,6 @@ impl Package {
             .ok_or(Error::Format)?;
         let cmd = doc["on"].as_str().map(|s| s.to_string());
         let build = doc["build"].as_str().map(|s| s.to_string());
-        let is_local = doc["local"].as_bool().unwrap_or(false);
 
         let types = match doc["for"].as_vec() {
             Some(f) => {
@@ -131,7 +127,6 @@ impl Package {
             load_command: cmd,
             for_types: types,
             build_command: build,
-            local: is_local,
         })
     }
 
@@ -141,7 +136,6 @@ impl Package {
         doc.insert(Yaml::from_str("name"), Yaml::from_str(&self.name));
         doc.insert(Yaml::from_str("category"), Yaml::from_str(&self.category));
         doc.insert(Yaml::from_str("opt"), Yaml::Boolean(self.opt));
-        doc.insert(Yaml::from_str("local"), Yaml::Boolean(self.local));
         if let Some(ref c) = self.load_command {
             doc.insert(Yaml::from_str("on"), Yaml::from_str(c));
         }
@@ -159,24 +153,9 @@ impl Package {
         Yaml::Hash(doc)
     }
 
-    /// Returns the name of the package from directory path for local packages
-    #[inline]
-    fn basename(&self) -> &str {
-        Path::new(&self.name)
-            .file_name()
-            .iter()
-            .find_map(|e| e.to_str())
-            .unwrap_or("")
-    }
-
     /// Returns absolute path to directory where plugin can be installed
     pub fn path(&self) -> PathBuf {
-        let repo = if self.local {
-            self.basename()
-        } else {
-            let (_, repo) = self.repo();
-            repo
-        };
+        let (_, repo) = self.repo();
         if self.opt {
             PACK_DIR.join(&self.category).join("opt").join(repo)
         } else {

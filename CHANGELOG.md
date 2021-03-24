@@ -9,6 +9,7 @@
 
 ### Removed
 - Per plugin configuration and related features have been removed. Use vimrc for plugin configuration.
+- Local plugin support removed. Use manual symlinks instead.
 
 ### Changed
 - Complete package names where applicable for fish shell
