@@ -42,9 +42,11 @@ lazy_static! {
 
 #[derive(Debug, Clone)]
 pub struct Package {
-    /// username/repo string for remote plugins
-    /// and directory path string for local plugins
+    /// Name of local directory where plugin is installed
+    /// Same as repo name of remote unless installed with --as 
     pub name: String,
+    /// Remote url of the repo to git clone from
+    pub remote: String,
     /// Install package under pack/<category>/
     pub category: String,
     pub opt: bool,
@@ -57,9 +59,10 @@ pub struct Package {
 }
 
 impl Package {
-    pub fn new(name: &str, category: &str, opt: bool) -> Package {
+    pub fn new(name: &str, remote: &str, category: &str, opt: bool) -> Package {
         Package {
             name: name.to_string(),
+            remote: remote.to_string(),
             category: category.to_string(),
             opt,
             load_command: None,
@@ -101,6 +104,10 @@ impl Package {
             .as_str()
             .map(|s| s.to_string())
             .ok_or(Error::Format)?;
+        let remote = doc["remote"]
+            .as_str()
+            .map(|s| s.to_string())
+            .ok_or(Error::Format)?;
         let opt = doc["opt"].as_bool().ok_or(Error::Format)?;
         let category = doc["category"]
             .as_str()
@@ -122,6 +129,7 @@ impl Package {
 
         Ok(Package {
             name,
+            remote,
             category,
             opt,
             load_command: cmd,
@@ -134,6 +142,7 @@ impl Package {
     pub fn into_yaml(self) -> Yaml {
         let mut doc = Hash::new();
         doc.insert(Yaml::from_str("name"), Yaml::from_str(&self.name));
+        doc.insert(Yaml::from_str("remote"), Yaml::from_str(&self.remote));
         doc.insert(Yaml::from_str("category"), Yaml::from_str(&self.category));
         doc.insert(Yaml::from_str("opt"), Yaml::Boolean(self.opt));
         if let Some(ref c) = self.load_command {
@@ -165,13 +174,12 @@ impl Package {
 
     /// Returns (username, repo) for remote packages
     pub fn repo(&self) -> (&str, &str) {
-        let mut info: Vec<&str> = self.name.splitn(2, '/').collect();
-        info.reverse();
+        let info: Vec<&str> = self.remote.rsplitn(3, '/').collect();
 
-        let repo = info.iter().next().unwrap_or(&"");
+        let _ = info.iter().next().unwrap_or(&"");
         let user = info.iter().next().unwrap_or(&"");
 
-        (user, repo)
+        (user, &self.name)
     }
 
     /// Run the build command using `sh -c ...`
@@ -358,28 +366,3 @@ where
     Ok(())
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn package_path_user_repo() {
-        let p = Package::new("user/reponame", "", false);
-        let exp = PACK_DIR.join("start").join("reponame");
-        assert_eq!(exp, p.path());
-    }
-
-    #[test]
-    fn package_path_nouser() {
-        let p = Package::new("reponame", "", false);
-        let exp = PACK_DIR.join("start").join("reponame");
-        assert_eq!(exp, p.path());
-    }
-
-    #[test]
-    fn package_path_repo_slash() {
-        let p = Package::new("user/reponame/with_slash", "", false);
-        let exp = PACK_DIR.join("start").join("reponame/with_slash");
-        assert_eq!(exp, p.path());
-    }
-}

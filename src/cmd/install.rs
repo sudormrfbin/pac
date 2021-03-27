@@ -31,16 +31,6 @@ impl InstallArgs {
     }
 }
 
-struct Plugins {
-    names: Vec<String>,
-    category: String,
-    opt: bool,
-    on: Option<String>,
-    types: Option<Vec<String>>,
-    build: Option<String>,
-    threads: usize,
-}
-
 pub fn exec(matches: &ArgMatches) {
     let args = InstallArgs::from_matches(matches);
 
@@ -56,80 +46,92 @@ pub fn exec(matches: &ArgMatches) {
     let opt = args.on.is_some() || args.for_.is_some() || args.opt;
     let types = args
         .for_
-        .map(|e| e.split(',').map(|e| e.to_string()).collect::<Vec<String>>());
+        .clone() // map consumes value but we need it in next block
+        .map(|e| e.split(',').map(|e| e.to_string()).collect::<Vec<String>>())
+        .unwrap_or_default();
 
-    let plugins = Plugins {
-        names: args.plugins,
-        category: args.category,
-        opt,
-        on: args.on,
-        types,
-        build: args.build,
-        threads,
-    };
+    let plugins = args
+        .plugins
+        .iter()
+        .map(|plug| {
+            // URL to git clone from
+            let remote = if !plug.starts_with("https://") {
+                format!("https://github.com/{}", plug)
+            } else {
+                plug.clone()
+            };
 
-    if let Err(e) = install_plugins(&plugins) {
+            // Install package under this name. Defaults to repo name
+            let name = remote.rsplitn(2, '/').next().unwrap().to_string();
+
+            // FIXME: too many clones
+            Package {
+                name,
+                remote,
+                category: args.category.clone(),
+                opt,
+                for_types: types.clone(),
+                load_command: args.on.clone(),
+                build_command: args.build.clone(),
+            }
+        })
+        .collect::<Vec<_>>();
+
+    if let Err(e) = install_plugins(plugins, threads) {
         die!("Err: {}", e);
     }
 }
 
-fn install_plugins(plugins: &Plugins) -> Result<()> {
-    let mut packs = package::fetch()?;
+// FIXME: refactor this
+fn install_plugins(toinstall_packs: Vec<Package>, threads: usize) -> Result<()> {
+    let mut installed_packs = package::fetch()?;
     {
-        let mut manager = TaskManager::new(TaskType::Install, plugins.threads);
+        let mut manager = TaskManager::new(TaskType::Install, threads);
 
-        if plugins.names.is_empty() {
-            for pack in &packs {
+        if toinstall_packs.is_empty() {
+            for pack in &installed_packs {
                 manager.add(pack.clone());
             }
         } else {
-            let targets = plugins.names.iter().map(|n| {
-                let mut p = Package::new(n, &plugins.category, plugins.opt);
-                if let Some(ref c) = plugins.on {
-                    p.set_load_command(c);
-                }
-                if let Some(ref t) = plugins.types {
-                    p.set_types(t.clone());
-                }
-                if let Some(ref c) = plugins.build {
-                    p.set_build_command(c);
-                }
-                p
-            });
-            for mut pack in targets {
-                let having = match packs.iter_mut().find(|x| x.name == pack.name) {
-                    Some(x) => {
-                        if !x.is_installed() {
-                            x.set_category(pack.category.as_str());
-                            x.set_opt(pack.opt);
-                            x.set_types(pack.for_types.clone());
+            for mut toins_pack in toinstall_packs {
+                let having = match installed_packs
+                    .iter_mut()
+                    .find(|ins_pack| ins_pack.name == toins_pack.name)
+                {
+                    Some(ins_pack) => {
+                        // plugin in config file but not installed
+                        if !ins_pack.is_installed() {
+                            ins_pack.set_category(toins_pack.category.as_str());
+                            ins_pack.set_opt(toins_pack.opt);
+                            ins_pack.set_types(toins_pack.for_types.clone());
 
-                            x.load_command = pack.load_command.clone();
-                            x.build_command = pack.build_command.clone();
+                            ins_pack.load_command = toins_pack.load_command.clone();
+                            ins_pack.build_command = toins_pack.build_command.clone();
                         } else {
-                            pack.set_category(x.category.as_str());
-                            pack.set_opt(x.opt);
+                            toins_pack.set_category(ins_pack.category.as_str());
+                            toins_pack.set_opt(ins_pack.opt);
                         }
                         true
                     }
                     None => false,
                 };
                 if !having {
-                    packs.push(pack.clone());
+                    // not yet installed, but add it anyway
+                    installed_packs.push(toins_pack.clone());
                 }
-                manager.add(pack);
+                manager.add(toins_pack.clone());
             }
         }
 
         for fail in manager.run(install_plugin) {
-            packs.retain(|e| e.name != fail);
+            installed_packs.retain(|e| e.name != fail);
         }
     }
 
-    packs.sort_by(|a, b| a.name.cmp(&b.name));
+    installed_packs.sort_by(|a, b| a.name.cmp(&b.name));
 
-    package::update_pack_plugin(&packs)?;
-    package::save(packs)
+    package::update_pack_plugin(&installed_packs)?;
+    package::save(installed_packs)
 }
 
 fn install_plugin(pack: &Package) -> (Result<()>, bool) {
