@@ -43,7 +43,7 @@ lazy_static! {
 #[derive(Debug, Clone)]
 pub struct Package {
     /// Name of local directory where plugin is installed
-    /// Same as repo name of remote unless installed with --as 
+    /// Same as repo name of remote unless installed with --as
     pub name: String,
     /// Remote url of the repo to git clone from
     pub remote: String,
@@ -84,18 +84,9 @@ impl Package {
         self.opt = opt;
     }
 
-    /// Set command to load the package on
-    pub fn set_load_command(&mut self, cmd: &str) {
-        self.load_command = Some(cmd.to_string())
-    }
-
     /// Set filetype(s) to load the package for
     pub fn set_types(&mut self, types: Vec<String>) {
         self.for_types = types
-    }
-
-    pub fn set_build_command(&mut self, cmd: &str) {
-        self.build_command = Some(cmd.to_string())
     }
 
     /// Parse a Package from a single list item in `PACK_FILE`
@@ -164,22 +155,11 @@ impl Package {
 
     /// Returns absolute path to directory where plugin can be installed
     pub fn path(&self) -> PathBuf {
-        let (_, repo) = self.repo();
         if self.opt {
-            PACK_DIR.join(&self.category).join("opt").join(repo)
+            PACK_DIR.join(&self.category).join("opt").join(&self.name)
         } else {
-            PACK_DIR.join(&self.category).join("start").join(repo)
+            PACK_DIR.join(&self.category).join("start").join(&self.name)
         }
-    }
-
-    /// Returns (username, repo) for remote packages
-    pub fn repo(&self) -> (&str, &str) {
-        let info: Vec<&str> = self.remote.rsplitn(3, '/').collect();
-
-        let _ = info.iter().next().unwrap_or(&"");
-        let user = info.iter().next().unwrap_or(&"");
-
-        (user, &self.name)
     }
 
     /// Run the build command using `sh -c ...`
@@ -295,7 +275,7 @@ pub fn update_pack_plugin(packs: &[Package]) -> Result<()> {
                 "command! -nargs=* -range -bang {cmd} packadd {repo} | \
                  call s:do_cmd('{cmd}', \"<bang>\", <line1>, <line2>, <q-args>)\n\n",
                 cmd = c,
-                repo = p.repo().1,
+                repo = p.name,
             );
         }
 
@@ -303,7 +283,7 @@ pub fn update_pack_plugin(packs: &[Package]) -> Result<()> {
             plug_setup += &format!(
                 "autocmd FileType {} packadd {}\n\n",
                 p.for_types.join(","),
-                p.repo().1,
+                p.name,
             );
         }
 

@@ -64,7 +64,7 @@ fn list_installed(category: &Option<String>, start: bool, opt: bool) -> Result<(
 
 fn list_detached(category: &Option<String>, start: bool, opt: bool) -> Result<()> {
     let installed = package::fetch()?;
-    let pack_names: Vec<&str> = installed.iter().map(|p| p.repo().1).collect();
+    let pack_names: Vec<&str> = installed.iter().map(|p| &*p.name).collect();
 
     package::walk_packs(category, start, opt, |cate, option, name| {
         if !pack_names.contains(&name) {
