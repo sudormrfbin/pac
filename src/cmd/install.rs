@@ -67,6 +67,7 @@ pub fn exec(matches: &ArgMatches) {
             // FIXME: too many clones
             Package {
                 name,
+                idname: Package::idname_from_remote(&remote),
                 remote,
                 category: args.category.clone(),
                 opt,
@@ -96,7 +97,7 @@ fn install_plugins(toinstall_packs: Vec<Package>, threads: usize) -> Result<()> 
             for mut toins_pack in toinstall_packs {
                 let having = match installed_packs
                     .iter_mut()
-                    .find(|ins_pack| ins_pack.name == toins_pack.name)
+                    .find(|ins_pack| ins_pack.idname == toins_pack.idname)
                 {
                     Some(ins_pack) => {
                         // plugin in config file but not installed
@@ -124,11 +125,11 @@ fn install_plugins(toinstall_packs: Vec<Package>, threads: usize) -> Result<()> 
         }
 
         for fail in manager.run(install_plugin) {
-            installed_packs.retain(|e| e.name != fail);
+            installed_packs.retain(|e| e.idname != fail);
         }
     }
 
-    installed_packs.sort_by(|a, b| a.name.cmp(&b.name));
+    installed_packs.sort_by(|a, b| a.idname.cmp(&b.idname));
 
     package::update_pack_plugin(&installed_packs)?;
     package::save(installed_packs)

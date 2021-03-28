@@ -32,7 +32,7 @@ fn uninstall_plugins(plugins: &[String]) -> Result<()> {
     let to_uninstall = plugins
         .iter()
         .map(
-            |plugin| match packs.iter().find(|pack| &pack.name == plugin) {
+            |plugin| match packs.iter().find(|pack| &pack.idname == plugin) {
                 Some(p) => Ok(p),
                 None => Err(Error::plugin_not_installed(plugin)),
             },
@@ -43,8 +43,8 @@ fn uninstall_plugins(plugins: &[String]) -> Result<()> {
         uninstall_plugin(pack)?;
     }
 
-    packs.retain(|x| !plugins.contains(&x.name)); // keep only installed plugins
-    packs.sort_by(|a, b| a.name.cmp(&b.name));
+    packs.retain(|x| !plugins.contains(&x.idname)); // keep only installed plugins
+    packs.sort_by(|a, b| a.idname.cmp(&b.idname));
     package::update_pack_plugin(&packs)?;
     package::save(packs)?;
 

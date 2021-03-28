@@ -43,7 +43,7 @@ impl TaskManager {
     where
         F: Fn(&Package) -> (Result<()>, bool),
     {
-        let msg = format!(" [{}]", &pack.name);
+        let msg = format!(" [{}]", &pack.idname);
         let pos = msg.len() as u16;
         echo::message(line, 0, &format!("    {} syncing", &msg));
 
@@ -119,15 +119,15 @@ impl TaskManager {
             let quit_notifier = quit_notifier.clone();
             thread::spawn(move || {
                 while let Ok(Some(pack)) = rx.recv() {
-                    log::info!("pack {}", &pack.name);
+                    log::info!("pack {}", &pack.idname);
                     let _wg = wg.clone();
                     {
                         let mut p = pending.lock().unwrap();
-                        log::info!("add to pending:{}", &pack.name);
+                        log::info!("add to pending:{}", &pack.idname);
                         p.push(pack.clone());
                     }
 
-                    let name = pack.name.clone();
+                    let name = pack.idname.clone();
                     let failures = failures.clone();
 
                     let (wtx, wrx) = bounded(0);
@@ -135,7 +135,7 @@ impl TaskManager {
                         let index = echo::line();
                         if !Self::update(&pack, index, func) {
                             let mut f = failures.lock().unwrap();
-                            f.push(pack.name);
+                            f.push(pack.idname);
                         }
                         let _ = wtx.send(());
                     });
@@ -149,7 +149,7 @@ impl TaskManager {
                     {
                         let mut p = pending.lock().unwrap();
                         log::info!("remove from pending: {}", &name);
-                        p.retain(|x| x.name != name);
+                        p.retain(|x| x.idname != name);
                     }
                 }
             });

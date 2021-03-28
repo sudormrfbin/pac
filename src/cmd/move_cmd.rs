@@ -33,7 +33,7 @@ pub fn exec(matches: &ArgMatches) {
 fn move_plugin(plugin: &str, category: &str, opt: bool) -> Result<()> {
     let mut packs = package::fetch()?;
     let changed = {
-        let pack = match packs.iter_mut().find(|p| p.name == plugin) {
+        let pack = match packs.iter_mut().find(|p| p.idname == plugin) {
             Some(p) => p,
             None => return Err(Error::plugin_not_installed(plugin)),
         };
@@ -56,7 +56,7 @@ fn move_plugin(plugin: &str, category: &str, opt: bool) -> Result<()> {
     };
 
     if changed {
-        packs.sort_by(|a, b| a.name.cmp(&b.name));
+        packs.sort_by(|a, b| a.idname.cmp(&b.idname));
         package::save(packs)?;
     }
     Ok(())

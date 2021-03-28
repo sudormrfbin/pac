@@ -9,7 +9,7 @@ pub fn exec(_matches: &ArgMatches) {
 fn update_packfile() -> Result<()> {
     let mut packs = package::fetch()?;
 
-    packs.sort_by(|a, b| a.name.cmp(&b.name));
+    packs.sort_by(|a, b| a.idname.cmp(&b.idname));
     package::update_pack_plugin(&packs)?;
 
     Ok(())

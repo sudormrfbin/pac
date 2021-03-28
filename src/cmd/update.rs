@@ -47,7 +47,7 @@ fn update_packfile() -> Result<()> {
     println!("Update _pack file for all plugins.");
     let mut packs = package::fetch()?;
 
-    packs.sort_by(|a, b| a.name.cmp(&b.name));
+    packs.sort_by(|a, b| a.idname.cmp(&b.idname));
     package::update_pack_plugin(&packs)?;
 
     Ok(())
@@ -59,23 +59,23 @@ fn update_plugins(plugins: &[String], threads: usize, skip: &[String]) -> Result
     let mut manager = TaskManager::new(TaskType::Update, threads);
     if plugins.is_empty() {
         for pack in &packs {
-            if skip.iter().any(|x| pack.name.contains(x)) {
-                println!("Skip {}", pack.name);
+            if skip.iter().any(|x| pack.idname.contains(x)) {
+                println!("Skip {}", pack.idname);
                 continue;
             }
             manager.add(pack.clone());
         }
     } else {
-        for pack in packs.iter().filter(|x| plugins.contains(&x.name)) {
+        for pack in packs.iter().filter(|x| plugins.contains(&x.idname)) {
             manager.add(pack.clone());
         }
     }
 
     for fail in manager.run(update_plugin) {
-        packs.retain(|e| e.name != fail);
+        packs.retain(|e| e.idname != fail);
     }
 
-    packs.sort_by(|a, b| a.name.cmp(&b.name));
+    packs.sort_by(|a, b| a.idname.cmp(&b.idname));
 
     package::update_pack_plugin(&packs)?;
 
@@ -95,7 +95,7 @@ fn update_plugin(pack: &Package) -> (Result<()>, bool) {
 fn do_update(pack: &Package) -> Result<()> {
     let path = pack.path();
     if !path.is_dir() {
-        Err(Error::plugin_not_installed(&pack.name))
+        Err(Error::plugin_not_installed(&pack.idname))
     } else {
         git::update(&pack.remote, &path)
     }

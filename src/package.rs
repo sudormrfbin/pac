@@ -45,6 +45,10 @@ pub struct Package {
     /// Name of local directory where plugin is installed
     /// Same as repo name of remote unless installed with --as
     pub name: String,
+    /// If remote is https://github.com/username/repo then idname
+    /// is username/repo. Arguments to install, update, move, etc
+    /// will be the idname, *not* name.
+    pub idname: String,
     /// Remote url of the repo to git clone from
     pub remote: String,
     /// Install package under pack/<category>/
@@ -62,6 +66,7 @@ impl Package {
     pub fn new(name: &str, remote: &str, category: &str, opt: bool) -> Package {
         Package {
             name: name.to_string(),
+            idname: Self::idname_from_remote(remote),
             remote: remote.to_string(),
             category: category.to_string(),
             opt,
@@ -69,6 +74,12 @@ impl Package {
             for_types: Vec::new(),
             build_command: None,
         }
+    }
+
+    /// Get username/repo from a git remote
+    pub fn idname_from_remote(remote: &str) -> String {
+        let parts = remote.split('/').collect::<Vec<_>>();
+        parts[parts.len() - 2..].join("/")
     }
 
     pub fn is_installed(&self) -> bool {
@@ -120,6 +131,7 @@ impl Package {
 
         Ok(Package {
             name,
+            idname: Self::idname_from_remote(&remote),
             remote,
             category,
             opt,
@@ -206,7 +218,7 @@ impl fmt::Display for Package {
         write!(
             f,
             "{} => pack/{}/{}{}{}",
-            &self.name, &self.category, name, on, types
+            &self.idname, &self.category, name, on, types
         )
     }
 }
@@ -346,3 +358,14 @@ where
     Ok(())
 }
 
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn package_idname_from_remote() {
+        let remote = "https://github.com/username/repo";
+        assert_eq!(Package::idname_from_remote(remote), "username/repo");
+    }
+}
