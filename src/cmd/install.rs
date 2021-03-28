@@ -149,6 +149,6 @@ fn do_install(pack: &Package) -> Result<()> {
     if path.is_dir() {
         Err(Error::plugin_installed(&path))
     } else {
-        git::clone(&pack.name, &path)
+        git::clone(&pack.remote, &path)
     }
 }

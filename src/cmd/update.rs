@@ -97,6 +97,6 @@ fn do_update(pack: &Package) -> Result<()> {
     if !path.is_dir() {
         Err(Error::plugin_not_installed(&pack.name))
     } else {
-        git::update(&pack.name, &path)
+        git::update(&pack.remote, &path)
     }
 }

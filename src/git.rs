@@ -4,23 +4,21 @@ use git2::{self, Repository};
 use std::fs;
 use std::path::Path;
 
-const LOCATION: &str = "https://github.com";
-
-fn fetch(repo: &Repository, name: &str) -> Result<()> {
-    let url = format!("{}/{}", LOCATION, name);
-
+fn fetch(repo: &Repository, remote: &str) -> Result<()> {
     let mut opts = git2::FetchOptions::new();
     opts.download_tags(git2::AutotagOption::All)
         .update_fetchhead(true);
 
     let refspec = "refs/heads/*:refs/heads/*";
-    let mut remote = repo.remote_anonymous(&url)?;
+    let mut remote = repo.remote_anonymous(&remote)?;
     remote.fetch(&[refspec], Some(&mut opts), None)?;
     Ok(())
 }
 
-fn sync_repo(repo: &Repository, name: &str) -> Result<()> {
-    fetch(&repo, name)?;
+/// Fetch changes from remote for a local repo, hard reset HEAD
+/// and update submodules.
+fn sync_repo(repo: &Repository, remote: &str) -> Result<()> {
+    fetch(&repo, remote)?;
     let reference = "HEAD";
     let oid = repo.refname_to_id(reference)?;
     let object = repo.find_object(oid, None)?;
@@ -29,18 +27,19 @@ fn sync_repo(repo: &Repository, name: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn clone<P: AsRef<Path>>(name: &str, target: P) -> Result<()> {
-    let repo = git2::Repository::init(&target)?;
-    let result = sync_repo(&repo, name);
+/// Clone a remote repository and update submodules.
+pub fn clone<P: AsRef<Path>>(remote: &str, path: P) -> Result<()> {
+    let repo = git2::Repository::init(&path)?;
+    let result = sync_repo(&repo, remote);
     if result.is_err() {
-        fs::remove_dir_all(&target)?;
+        fs::remove_dir_all(&path)?;
     }
     result
 }
 
-pub fn update<P: AsRef<Path>>(name: &str, path: P) -> Result<()> {
+pub fn update<P: AsRef<Path>>(remote: &str, path: P) -> Result<()> {
     let repo = Repository::open(&path)?;
-    sync_repo(&repo, name)
+    sync_repo(&repo, remote)
 }
 
 fn update_submodules(repo: &Repository) -> Result<()> {
