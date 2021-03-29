@@ -6,6 +6,7 @@
 
 ### Added
 - This changelog ;)
+- `--as` option for install command to install package under a different name.
 
 ### Removed
 - Per plugin configuration and related features have been removed. Use vimrc for plugin configuration.

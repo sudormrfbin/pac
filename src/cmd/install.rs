@@ -11,6 +11,7 @@ struct InstallArgs {
     plugins: Vec<String>,
     on: Option<String>,
     for_: Option<String>,
+    as_: Option<String>,
     threads: Option<usize>,
     opt: bool,
     category: String,
@@ -23,6 +24,7 @@ impl InstallArgs {
             plugins: m.values_of_lossy("package").unwrap_or_else(|| vec![]),
             on: value_t!(m, "on", String).ok(),
             for_: value_t!(m, "for", String).ok(),
+            as_: value_t!(m, "as", String).ok(),
             threads: value_t!(m, "threads", usize).ok(),
             opt: m.is_present("opt"),
             category: value_t!(m, "category", String).unwrap_or_default(),
@@ -33,6 +35,11 @@ impl InstallArgs {
 
 pub fn exec(matches: &ArgMatches) {
     let args = InstallArgs::from_matches(matches);
+
+    // This check cannot be done with clap
+    if args.as_.is_some() && args.plugins.len() > 1 {
+        die!("Multiple plugins cannot be specified with --as");
+    }
 
     let threads = match args.threads {
         Some(t) => t,
@@ -62,11 +69,15 @@ pub fn exec(matches: &ArgMatches) {
             };
 
             // Install package under this name. Defaults to repo name
-            let name = remote.rsplitn(2, '/').next().unwrap().to_string();
+            let name = args
+                .as_
+                // unwrap_or_else consumes self so deref to Option<&str>
+                .as_deref()
+                .unwrap_or_else(|| remote.rsplitn(2, '/').next().unwrap());
 
             // FIXME: too many clones
             Package {
-                name,
+                name: name.to_string(),
                 idname: Package::idname_from_remote(&remote),
                 remote,
                 category: args.category.clone(),
