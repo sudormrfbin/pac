@@ -6,11 +6,11 @@
 
 ### Added
 - This changelog ;)
-- `--as` option for install command to install package under a different name.
+- `--as` option for install command to install package under a different name
 
 ### Removed
-- Per plugin configuration and related features have been removed. Use vimrc for plugin configuration.
-- Local plugin support removed. Use manual symlinks instead.
+- Per plugin configuration and related features have been removed, use vimrc for plugin configuration
+- Local plugin support removed, use manual symlinks instead
 
 ### Changed
 - Complete package names where applicable for fish shell
