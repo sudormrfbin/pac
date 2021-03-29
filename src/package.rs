@@ -1,4 +1,5 @@
 use crate::{Error, Result};
+use crate::git::GitRepo;
 
 use std::env;
 use std::fmt;
@@ -198,6 +199,12 @@ impl Package {
             }
         }
         Ok(())
+    }
+}
+
+impl GitRepo for Package {
+    fn path_info(&self) -> (&str, PathBuf) {
+        (&self.remote, self.path())
     }
 }
 

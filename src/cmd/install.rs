@@ -1,4 +1,4 @@
-use crate::git;
+use crate::git::GitRepo;
 use crate::package::{self, Package};
 use crate::task::{TaskManager, TaskType};
 use crate::{Error, Result};
@@ -161,6 +161,6 @@ fn do_install(pack: &Package) -> Result<()> {
     if path.is_dir() {
         Err(Error::plugin_installed(&path))
     } else {
-        git::clone(&pack.remote, &path)
+        pack.git_clone()
     }
 }

@@ -1,4 +1,4 @@
-use crate::git;
+use crate::git::GitRepo;
 use crate::package::{self, Package};
 use crate::task::{TaskManager, TaskType};
 use crate::{Error, Result};
@@ -97,6 +97,6 @@ fn do_update(pack: &Package) -> Result<()> {
     if !path.is_dir() {
         Err(Error::plugin_not_installed(&pack.idname))
     } else {
-        git::update(&pack.remote, &path)
+        pack.git_pull()
     }
 }

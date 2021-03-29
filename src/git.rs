@@ -2,7 +2,7 @@ use crate::Result;
 
 use git2::{self, Repository};
 use std::fs;
-use std::path::Path;
+use std::path::PathBuf;
 
 fn fetch(repo: &Repository, remote: &str) -> Result<()> {
     let mut opts = git2::FetchOptions::new();
@@ -27,21 +27,6 @@ fn sync_repo(repo: &Repository, remote: &str) -> Result<()> {
     Ok(())
 }
 
-/// Clone a remote repository and update submodules.
-pub fn clone<P: AsRef<Path>>(remote: &str, path: P) -> Result<()> {
-    let repo = git2::Repository::init(&path)?;
-    let result = sync_repo(&repo, remote);
-    if result.is_err() {
-        fs::remove_dir_all(&path)?;
-    }
-    result
-}
-
-pub fn update<P: AsRef<Path>>(remote: &str, path: P) -> Result<()> {
-    let repo = Repository::open(&path)?;
-    sync_repo(&repo, remote)
-}
-
 fn update_submodules(repo: &Repository) -> Result<()> {
     fn add_subrepos(repo: &Repository, list: &mut Vec<Repository>) -> Result<()> {
         for mut subm in repo.submodules()? {
@@ -60,4 +45,28 @@ fn update_submodules(repo: &Repository) -> Result<()> {
         add_subrepos(&r, &mut repos)?;
     }
     Ok(())
+}
+
+/// Trait representing high level git operations on a repo
+pub trait GitRepo {
+
+    /// Get (remote_url, local_path) for cloning and updating repo
+    fn path_info(&self) -> (&str, PathBuf);
+
+    /// Clone a remote repository and update submodules.
+    fn git_clone(&self) -> Result<()> {
+        let (remote, path) = self.path_info();
+        let repo = git2::Repository::init(&path)?;
+        let result = sync_repo(&repo, remote);
+        if result.is_err() {
+            fs::remove_dir_all(&path)?;
+        }
+        result
+    }
+
+    fn git_pull(&self) -> Result<()> {
+        let (remote, path) = self.path_info();
+        let repo = Repository::open(&path)?;
+        sync_repo(&repo, remote)
+    }
 }
