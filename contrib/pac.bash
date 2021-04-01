@@ -1,4 +1,4 @@
-_pack() {
+_pac() {
     local i cur prev opts cmds
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
@@ -9,15 +9,12 @@ _pack() {
     for i in ${COMP_WORDS[@]}
     do
         case "${i}" in
-            pack)
-                cmd="pack"
+            pac)
+                cmd="pac"
                 ;;
             
             completions)
                 cmd+="__completions"
-                ;;
-            config)
-                cmd+="__config"
                 ;;
             generate)
                 cmd+="__generate"
@@ -46,8 +43,8 @@ _pack() {
     done
 
     case "${cmd}" in
-        pack)
-            opts=" -h -V  --help --version   list install uninstall config move update generate completions help"
+        pac)
+            opts=" -h -V  --help --version   list install uninstall move update generate completions help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 return 0
@@ -62,7 +59,7 @@ _pack() {
             return 0
             ;;
         
-        pack__completions)
+        pac__completions)
             opts=" -h -V  --help --version  <SHELL> "
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
@@ -77,22 +74,7 @@ _pack() {
             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
             return 0
             ;;
-        pack__config)
-            opts=" -d -h -V  --delete --help --version  <package> "
-            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
-                COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
-                return 0
-            fi
-            case "${prev}" in
-                
-                *)
-                    COMPREPLY=()
-                    ;;
-            esac
-            COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
-            return 0
-            ;;
-        pack__generate)
+        pac__generate)
             opts=" -h -V  --help --version  "
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
@@ -107,7 +89,7 @@ _pack() {
             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
             return 0
             ;;
-        pack__help)
+        pac__help)
             opts=" -h -V  --help --version  "
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
@@ -122,8 +104,8 @@ _pack() {
             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
             return 0
             ;;
-        pack__install)
-            opts=" -o -l -h -V -c -j  --opt --local --help --version --category --on --for --build --threads  <package>... "
+        pac__install)
+            opts=" -o -h -V -c -j  --opt --help --version --category --as --on --for --build --threads  <package>... "
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 return 0
@@ -131,31 +113,35 @@ _pack() {
             case "${prev}" in
                 
                 --category)
-                    COMPREPLY=($(compgen -f ${cur}))
+                    COMPREPLY=("<CATEGORY>")
                     return 0
                     ;;
                     -c)
-                    COMPREPLY=($(compgen -f ${cur}))
+                    COMPREPLY=("<CATEGORY>")
+                    return 0
+                    ;;
+                --as)
+                    COMPREPLY=("<NAME>")
                     return 0
                     ;;
                 --on)
-                    COMPREPLY=($(compgen -f ${cur}))
+                    COMPREPLY=("<LOAD_CMD>")
                     return 0
                     ;;
                 --for)
-                    COMPREPLY=($(compgen -f ${cur}))
+                    COMPREPLY=("<TYPES>")
                     return 0
                     ;;
                 --build)
-                    COMPREPLY=($(compgen -f ${cur}))
+                    COMPREPLY=("<BUILD_CMD>")
                     return 0
                     ;;
                 --threads)
-                    COMPREPLY=($(compgen -f ${cur}))
+                    COMPREPLY=("<THREADS>")
                     return 0
                     ;;
                     -j)
-                    COMPREPLY=($(compgen -f ${cur}))
+                    COMPREPLY=("<THREADS>")
                     return 0
                     ;;
                 *)
@@ -165,8 +151,8 @@ _pack() {
             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
             return 0
             ;;
-        pack__list)
-            opts=" -s -o -h -V -c  --start --opt --help --version --category  "
+        pac__list)
+            opts=" -s -o -d -h -V -c  --start --opt --detached --help --version --category  "
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 return 0
@@ -174,11 +160,11 @@ _pack() {
             case "${prev}" in
                 
                 --category)
-                    COMPREPLY=($(compgen -f ${cur}))
+                    COMPREPLY=("<CATEGORY>")
                     return 0
                     ;;
                     -c)
-                    COMPREPLY=($(compgen -f ${cur}))
+                    COMPREPLY=("<CATEGORY>")
                     return 0
                     ;;
                 *)
@@ -188,7 +174,7 @@ _pack() {
             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
             return 0
             ;;
-        pack__move)
+        pac__move)
             opts=" -o -h -V  --opt --help --version  <package> <category> "
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
@@ -203,8 +189,8 @@ _pack() {
             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
             return 0
             ;;
-        pack__uninstall)
-            opts=" -a -h -V  --all --help --version  <package>... "
+        pac__uninstall)
+            opts=" -h -V  --help --version  <package>... "
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 return 0
@@ -218,8 +204,8 @@ _pack() {
             COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
             return 0
             ;;
-        pack__update)
-            opts=" -s -p -j -h -V  --skip --packfile --threads --help --version  <package>... "
+        pac__update)
+            opts=" -s -j -h -V  --skip --threads --help --version  <package>... "
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 return 0
@@ -236,4 +222,4 @@ _pack() {
     esac
 }
 
-complete -F _pack -o bashdefault -o default pack
+complete -F _pac -o bashdefault -o default pac

@@ -1,41 +1,32 @@
-#compdef pack
+#compdef pac
 
-autoload -U is-at-least
-
-_pack() {
+_pac() {
     typeset -A opt_args
-    typeset -a _arguments_options
     local ret=1
 
-    if is-at-least 5.2; then
-        _arguments_options=(-s -S -C)
-    else
-        _arguments_options=(-s -C)
-    fi
-
     local context curcontext="$curcontext" state line
-    _arguments "${_arguments_options[@]}" \
+    _arguments -s -S -C \
 '-h[Prints help information]' \
 '--help[Prints help information]' \
 '-V[Prints version information]' \
 '--version[Prints version information]' \
-":: :_pack_commands" \
-"*::: :->pack" \
+"1:: :_pac_commands" \
+"*:: :->pac" \
 && ret=0
     case $state in
-    (pack)
-        words=($line[1] "${words[@]}")
-        (( CURRENT += 1 ))
-        curcontext="${curcontext%:*:*}:pack-command-$line[1]:"
+    (pac)
+        curcontext="${curcontext%:*:*}:pac-command-$words[1]:"
         case $line[1] in
             (list)
-_arguments "${_arguments_options[@]}" \
+_arguments -s -S -C \
 '-c+[List packages under this category]' \
-'--category=[List packages under this category]' \
+'--category+[List packages under this category]' \
 '(-o --opt)-s[List start packages]' \
 '(-o --opt)--start[List start packages]' \
 '(-s --start)-o[List optional packages]' \
 '(-s --start)--opt[List optional packages]' \
+'-d[List detached(untracked) packages]' \
+'--detached[List detached(untracked) packages]' \
 '-h[Prints help information]' \
 '--help[Prints help information]' \
 '-V[Prints version information]' \
@@ -43,76 +34,59 @@ _arguments "${_arguments_options[@]}" \
 && ret=0
 ;;
 (install)
-_arguments "${_arguments_options[@]}" \
+_arguments -s -S -C \
 '-c+[Install package under provided category]' \
-'--category=[Install package under provided category]' \
-'--on=[Command for loading the plugins]' \
-'--for=[Load this plugins for specific types]' \
-'--build=[Build command for build package]' \
+'--category+[Install package under provided category]' \
+'--as+[Install plugin under this name]' \
+'--on+[Command for loading the plugins]' \
+'--for+[Load this plugins for specific types]' \
+'--build+[Build command for build package]' \
 '-j+[Installing packages concurrently]' \
-'--threads=[Installing packages concurrently]' \
+'--threads+[Installing packages concurrently]' \
 '-o[Install plugins as opt(ional)]' \
 '--opt[Install plugins as opt(ional)]' \
-'-l[Install local plugins]' \
-'--local[Install local plugins]' \
 '-h[Prints help information]' \
 '--help[Prints help information]' \
 '-V[Prints version information]' \
 '--version[Prints version information]' \
-':package:_files' \
+"1:: :_pac__install_commands" \
 && ret=0
 ;;
 (uninstall)
-_arguments "${_arguments_options[@]}" \
-'-a[remove all package related configuration as well]' \
-'--all[remove all package related configuration as well]' \
+_arguments -s -S -C \
 '-h[Prints help information]' \
 '--help[Prints help information]' \
 '-V[Prints version information]' \
 '--version[Prints version information]' \
-':package:_files' \
-&& ret=0
-;;
-(config)
-_arguments "${_arguments_options[@]}" \
-'-d[Delete package configuration file]' \
-'--delete[Delete package configuration file]' \
-'-h[Prints help information]' \
-'--help[Prints help information]' \
-'-V[Prints version information]' \
-'--version[Prints version information]' \
-':package:_files' \
+"1:: :_pac__uninstall_commands" \
 && ret=0
 ;;
 (move)
-_arguments "${_arguments_options[@]}" \
+_arguments -s -S -C \
 '-o[Make package optional]' \
 '--opt[Make package optional]' \
 '-h[Prints help information]' \
 '--help[Prints help information]' \
 '-V[Prints version information]' \
 '--version[Prints version information]' \
-':package -- Package to move:_files' \
-'::category -- Category to move the package to:_files' \
+"1:: :_pac__move_commands" \
 && ret=0
 ;;
 (update)
-_arguments "${_arguments_options[@]}" \
+_arguments -s -S -C \
 '*-s[Skip packages]' \
 '*--skip[Skip packages]' \
-'-p[Regenerate the '\''_pack'\'' file (combine all package configurations)]' \
-'--packfile[Regenerate the '\''_pack'\'' file (combine all package configurations)]' \
 '-j[Updating packages concurrently]' \
 '--threads[Updating packages concurrently]' \
 '-h[Prints help information]' \
 '--help[Prints help information]' \
 '-V[Prints version information]' \
 '--version[Prints version information]' \
-'::package -- Packages to update, default all:_files' \
+"1:: :_pac__update_commands" \
 && ret=0
 ;;
 (generate)
-_arguments "${_arguments_options[@]}" \
+_arguments -s -S -C \
 '-h[Prints help information]' \
 '--help[Prints help information]' \
 '-V[Prints version information]' \
@@ -120,16 +94,16 @@ _arguments "${_arguments_options[@]}" \
 && ret=0
 ;;
 (completions)
-_arguments "${_arguments_options[@]}" \
+_arguments -s -S -C \
 '-h[Prints help information]' \
 '--help[Prints help information]' \
 '-V[Prints version information]' \
 '--version[Prints version information]' \
-':SHELL -- The shell to generate the script for:(bash fish zsh)' \
+"1:: :_pac__completions_commands" \
 && ret=0
 ;;
 (help)
-_arguments "${_arguments_options[@]}" \
+_arguments -s -S -C \
 '-h[Prints help information]' \
 '--help[Prints help information]' \
 '-V[Prints version information]' \
@@ -141,83 +115,76 @@ _arguments "${_arguments_options[@]}" \
 esac
 }
 
-(( $+functions[_pack_commands] )) ||
-_pack_commands() {
+(( $+functions[_pac_commands] )) ||
+_pac_commands() {
     local commands; commands=(
         "list:List installed packages" \
 "install:Install new packages/plugins" \
 "uninstall:Uninstall packages/plugins" \
-"config:Configure/edit the package specific configuration" \
 "move:Move a package to a different category or make it optional." \
 "update:Update packages" \
 "generate:Generate the pack package file" \
 "completions:Generates completion scripts for your shell" \
 "help:Prints this message or the help of the given subcommand(s)" \
     )
-    _describe -t commands 'pack commands' commands "$@"
+    _describe -t commands 'pac commands' commands "$@"
 }
-(( $+functions[_pack__completions_commands] )) ||
-_pack__completions_commands() {
+(( $+functions[_pac__completions_commands] )) ||
+_pac__completions_commands() {
+    local commands; commands=(
+        "SHELL:The shell to generate the script for" \
+    )
+    _describe -t commands 'pac completions commands' commands "$@"
+}
+(( $+functions[_pac__generate_commands] )) ||
+_pac__generate_commands() {
     local commands; commands=(
         
     )
-    _describe -t commands 'pack completions commands' commands "$@"
+    _describe -t commands 'pac generate commands' commands "$@"
 }
-(( $+functions[_pack__config_commands] )) ||
-_pack__config_commands() {
+(( $+functions[_pac__help_commands] )) ||
+_pac__help_commands() {
     local commands; commands=(
         
     )
-    _describe -t commands 'pack config commands' commands "$@"
+    _describe -t commands 'pac help commands' commands "$@"
 }
-(( $+functions[_pack__generate_commands] )) ||
-_pack__generate_commands() {
+(( $+functions[_pac__install_commands] )) ||
+_pac__install_commands() {
+    local commands; commands=(
+        "PACKAGE:" \
+    )
+    _describe -t commands 'pac install commands' commands "$@"
+}
+(( $+functions[_pac__list_commands] )) ||
+_pac__list_commands() {
     local commands; commands=(
         
     )
-    _describe -t commands 'pack generate commands' commands "$@"
+    _describe -t commands 'pac list commands' commands "$@"
 }
-(( $+functions[_pack__help_commands] )) ||
-_pack__help_commands() {
+(( $+functions[_pac__move_commands] )) ||
+_pac__move_commands() {
     local commands; commands=(
-        
+        "PACKAGE:Package to move" \
+"CATEGORY:Category to move the package to" \
     )
-    _describe -t commands 'pack help commands' commands "$@"
+    _describe -t commands 'pac move commands' commands "$@"
 }
-(( $+functions[_pack__install_commands] )) ||
-_pack__install_commands() {
+(( $+functions[_pac__uninstall_commands] )) ||
+_pac__uninstall_commands() {
     local commands; commands=(
-        
+        "PACKAGE:" \
     )
-    _describe -t commands 'pack install commands' commands "$@"
+    _describe -t commands 'pac uninstall commands' commands "$@"
 }
-(( $+functions[_pack__list_commands] )) ||
-_pack__list_commands() {
+(( $+functions[_pac__update_commands] )) ||
+_pac__update_commands() {
     local commands; commands=(
-        
+        "PACKAGE:Packages to update, default all" \
     )
-    _describe -t commands 'pack list commands' commands "$@"
-}
-(( $+functions[_pack__move_commands] )) ||
-_pack__move_commands() {
-    local commands; commands=(
-        
-    )
-    _describe -t commands 'pack move commands' commands "$@"
-}
-(( $+functions[_pack__uninstall_commands] )) ||
-_pack__uninstall_commands() {
-    local commands; commands=(
-        
-    )
-    _describe -t commands 'pack uninstall commands' commands "$@"
-}
-(( $+functions[_pack__update_commands] )) ||
-_pack__update_commands() {
-    local commands; commands=(
-        
-    )
-    _describe -t commands 'pack update commands' commands "$@"
+    _describe -t commands 'pac update commands' commands "$@"
 }
 
-_pack "$@"
+_pac "$@"

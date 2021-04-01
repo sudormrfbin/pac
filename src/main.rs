@@ -32,7 +32,7 @@ fn main() {
         ("generate", Some(m)) => cmd::generate::exec(m),
         ("completions", Some(m)) => {
             let shell = m.value_of("SHELL").unwrap();
-            cli::build_cli().gen_completions_to("pack", shell.parse().unwrap(), &mut io::stdout());
+            cli::build_cli().gen_completions_to("pac", shell.parse().unwrap(), &mut io::stdout());
         }
         _ => cmd::list::exec(&ArgMatches::default()),
     }
