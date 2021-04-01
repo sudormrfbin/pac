@@ -4,7 +4,7 @@ Package manager for vim/neovim using builtin `packages` written in rust.
 
 ## Install
 
-Download and extract the precompiled binary from the releases page and put it somewhere in you `$PATH`
+Download and extract the precompiled binary from the releases page and put it somewhere in you `$PATH`.
 
 ## Usage
 
@@ -61,6 +61,11 @@ For bash, move `contrib/pac.bash` to `$XDG_CONFIG_HOME/bash_completion` or `/etc
 For fish, move `contrib/pac.fish` to `$HOME/.config/fish/completions/`.
 
 For zsh, move `contrib/_pac` to one of your `$fpath` directories.
+
+## Acknowledgements
+
+This project was forked from [maralla/pack](https://github.com/maralla/pack)
+as a means of learning rust and adding features.
 
 ## License
 
