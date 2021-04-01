@@ -22,7 +22,7 @@ pub enum Error {
     NoPlugin,
     SkipLocal,
     PluginInstalled(String),
-    PackFile(String),
+    PaconfigFile(String),
     CopyDir(String),
     SaveYaml,
     LoadYaml,
@@ -89,8 +89,8 @@ impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Error::Format => write!(f, "Invalid format"),
-            Error::SaveYaml => write!(f, "Fail to save packfile"),
-            Error::LoadYaml => write!(f, "Fail to load packfile"),
+            Error::SaveYaml => write!(f, "Fail to save paconfig.yaml"),
+            Error::LoadYaml => write!(f, "Fail to load paconfig.yaml"),
             Error::Editor => write!(f, "Can not open editor"),
             Error::NoPlugin => write!(f, "Can not find such plugin"),
             Error::SkipLocal => write!(f, "Local plugin. Skipping"),
@@ -100,7 +100,7 @@ impl fmt::Display for Error {
             | Error::CopyDir(ref s)
             | Error::PluginInstalled(ref s)
             | Error::PluginNotInstalled(ref s)
-            | Error::PackFile(ref s) => write!(f, "{}", s),
+            | Error::PaconfigFile(ref s) => write!(f, "{}", s),
         }
         // write!(f, "{}", self.description())
     }

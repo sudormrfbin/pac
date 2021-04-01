@@ -1,8 +1,8 @@
 use clap::{App, AppSettings, Arg, SubCommand};
 
 pub fn build_cli() -> App<'static, 'static> {
-    App::new("pack")
-        .about("Package manager for vim")
+    App::new("pac")
+        .about(clap::crate_description!())
         .author(clap::crate_authors!())
         .version(clap::crate_version!())
         .subcommand(
@@ -134,10 +134,11 @@ pub fn build_cli() -> App<'static, 'static> {
                         .multiple(true),
                 ),
         )
+        // TODO: remove generate subcommand (package config no longer managed by pac)
         .subcommand(
             SubCommand::with_name("generate")
                 .about("Generate the pack package file")
-                .help("Generate _pack.vim file which combines all package configurations"),
+                .help("Generate _pac.vim file which combines all package configurations"),
         )
         .subcommand(
             SubCommand::with_name("completions")

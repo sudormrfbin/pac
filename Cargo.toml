@@ -1,7 +1,12 @@
 [package]
-name = "pack"
-version = "0.2.5"
-authors = ["maralla <maralla.ai@gmail.com>"]
+name = "pac"
+version = "0.1.0"
+authors = ["Gokul Soumya"]
+description = "Package manager for vim/neovim"
+repository = "https://github.com/gokulsoumya/pac"
+license = "MIT"
+keywords = ["vim", "neovim", "package", "plugin", "manager"]
+categories = ["command-line-utilities", "text-editors"]
 edition = "2018"
 
 [dependencies]
