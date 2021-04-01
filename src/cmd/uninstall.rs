@@ -45,7 +45,7 @@ fn uninstall_plugins(plugins: &[String]) -> Result<()> {
 
     packs.retain(|x| !plugins.contains(&x.idname)); // keep only installed plugins
     packs.sort_by(|a, b| a.idname.cmp(&b.idname));
-    package::update_pack_plugin(&packs)?;
+    package::update_pac_plugin(&packs)?;
     package::save(packs)?;
 
     println!();

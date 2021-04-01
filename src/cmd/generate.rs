@@ -3,14 +3,15 @@ use crate::Result;
 use clap::ArgMatches;
 
 pub fn exec(_matches: &ArgMatches) {
-    let _ = update_packfile();
+    let _ = update_paconfig();
 }
 
-fn update_packfile() -> Result<()> {
+// TODO: code repetition, refactor
+fn update_paconfig() -> Result<()> {
     let mut packs = package::fetch()?;
 
     packs.sort_by(|a, b| a.idname.cmp(&b.idname));
-    package::update_pack_plugin(&packs)?;
+    package::update_pac_plugin(&packs)?;
 
     Ok(())
 }

@@ -142,7 +142,7 @@ fn install_plugins(toinstall_packs: Vec<Package>, threads: usize) -> Result<()> 
 
     installed_packs.sort_by(|a, b| a.idname.cmp(&b.idname));
 
-    package::update_pack_plugin(&installed_packs)?;
+    package::update_pac_plugin(&installed_packs)?;
     package::save(installed_packs)
 }
 

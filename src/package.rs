@@ -233,17 +233,17 @@ impl fmt::Display for Package {
 
 pub fn fetch() -> Result<Vec<Package>> {
     if PAC_CONFIG_FILE.is_file() {
-        fetch_from_packfile(&*PAC_CONFIG_FILE)
-            .map_err(|e| Error::PackFile(format!("Fail to parse packfile: {}", e)))
+        fetch_from_paconfig(&*PAC_CONFIG_FILE)
+            .map_err(|e| Error::PaconfigFile(format!("Fail to parse paconfig: {}", e)))
     } else {
         Ok(vec![])
     }
 }
 
-/// Returns a list of packages parsed from packfile
-fn fetch_from_packfile<P: AsRef<Path>>(packfile: P) -> Result<Vec<Package>> {
+/// Returns a list of packages parsed from paconfig
+fn fetch_from_paconfig<P: AsRef<Path>>(paconfig: P) -> Result<Vec<Package>> {
     let mut data = String::new();
-    File::open(packfile.as_ref())?.read_to_string(&mut data)?;
+    File::open(paconfig.as_ref())?.read_to_string(&mut data)?;
     let docs = YamlLoader::load_from_str(&data)?;
 
     let mut ret = Vec::new();
@@ -257,7 +257,7 @@ fn fetch_from_packfile<P: AsRef<Path>>(packfile: P) -> Result<Vec<Package>> {
     Ok(ret)
 }
 
-/// Write out the yaml packfile under `PAC_CONFIG_DIR` creating it
+/// Write out the yaml paconfig under `PAC_CONFIG_DIR` creating it
 /// if necessary.
 pub fn save(packs: Vec<Package>) -> Result<()> {
     let packs = packs
@@ -279,8 +279,8 @@ pub fn save(packs: Vec<Package>) -> Result<()> {
     Ok(())
 }
 
-/// Update `_pack.vim` file in plugin directory.
-pub fn update_pack_plugin(packs: &[Package]) -> Result<()> {
+/// Update `_pac.vim` file in plugin directory.
+pub fn update_pac_plugin(packs: &[Package]) -> Result<()> {
     if !VIM_PLUGIN_DIR.is_dir() {
         fs::create_dir_all(&*VIM_PLUGIN_DIR)?;
     }

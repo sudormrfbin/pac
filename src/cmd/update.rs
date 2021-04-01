@@ -9,7 +9,7 @@ struct UpdateArgs {
     plugins: Vec<String>,
     skip: Vec<String>,
     threads: Option<usize>,
-    packfile: bool,
+    paconfig: bool,
 }
 
 impl UpdateArgs {
@@ -18,7 +18,8 @@ impl UpdateArgs {
             plugins: m.values_of_lossy("package").unwrap_or_else(|| vec![]),
             skip: m.values_of_lossy("skip").unwrap_or_else(|| vec![]),
             threads: value_t!(m, "threads", usize).ok(),
-            packfile: m.is_present("packfile"),
+            // TODO: remove this opt (already removed from cli)
+            paconfig: m.is_present("paconfig"),
         }
     }
 }
@@ -26,8 +27,8 @@ impl UpdateArgs {
 pub fn exec(matches: &ArgMatches) {
     let args = UpdateArgs::from_matches(matches);
 
-    if args.packfile {
-        if let Err(e) = update_packfile() {
+    if args.paconfig {
+        if let Err(e) = update_paconfig() {
             die!("Err: {}", e);
         }
         return;
@@ -43,12 +44,12 @@ pub fn exec(matches: &ArgMatches) {
     }
 }
 
-fn update_packfile() -> Result<()> {
+fn update_paconfig() -> Result<()> {
     println!("Update _pack file for all plugins.");
     let mut packs = package::fetch()?;
 
     packs.sort_by(|a, b| a.idname.cmp(&b.idname));
-    package::update_pack_plugin(&packs)?;
+    package::update_pac_plugin(&packs)?;
 
     Ok(())
 }
@@ -77,7 +78,7 @@ fn update_plugins(plugins: &[String], threads: usize, skip: &[String]) -> Result
 
     packs.sort_by(|a, b| a.idname.cmp(&b.idname));
 
-    package::update_pack_plugin(&packs)?;
+    package::update_pac_plugin(&packs)?;
 
     Ok(())
 }
