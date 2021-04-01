@@ -1,8 +1,8 @@
 use clap::{App, AppSettings, Arg, SubCommand};
 
 pub fn build_cli() -> App<'static, 'static> {
-    App::new("pack")
-        .about("Package manager for vim")
+    App::new("pac")
+        .about(clap::crate_description!())
         .author(clap::crate_authors!())
         .version(clap::crate_version!())
         .subcommand(
