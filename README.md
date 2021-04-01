@@ -4,7 +4,9 @@ Package manager for vim/neovim using builtin `packages` written in rust.
 
 ## Install
 
-Download and extract the precompiled binary from the releases page and put it somewhere in you `$PATH`.
+Download and extract the precompiled binary from the
+[releases](https://github.com/gokulsoumya/pac/releases) page and put
+it somewhere in you `$PATH`.
 
 ## Usage
 
