@@ -12,7 +12,7 @@ struct UninstallArgs {
 impl UninstallArgs {
     fn from_matches(m: &ArgMatches) -> UninstallArgs {
         UninstallArgs {
-            plugins: m.values_of_lossy("package").unwrap_or_else(|| vec![]),
+            plugins: m.values_of_lossy("package").unwrap_or_default(),
         }
     }
 }

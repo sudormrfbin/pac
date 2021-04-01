@@ -28,7 +28,7 @@ pub struct TaskManager {
 impl TaskManager {
     pub fn new(task_type: TaskType, thread_num: usize) -> TaskManager {
         TaskManager {
-            task_type: task_type,
+            task_type,
             packs: Vec::new(),
             thread_num,
         }

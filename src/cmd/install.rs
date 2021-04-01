@@ -4,7 +4,6 @@ use crate::task::{TaskManager, TaskType};
 use crate::{Error, Result};
 
 use clap::{value_t, ArgMatches};
-use num_cpus;
 
 #[derive(Debug)]
 struct InstallArgs {
@@ -21,7 +20,7 @@ struct InstallArgs {
 impl InstallArgs {
     fn from_matches(m: &ArgMatches) -> InstallArgs {
         InstallArgs {
-            plugins: m.values_of_lossy("package").unwrap_or_else(|| vec![]),
+            plugins: m.values_of_lossy("package").unwrap_or_default(),
             on: value_t!(m, "on", String).ok(),
             for_: value_t!(m, "for", String).ok(),
             as_: value_t!(m, "as", String).ok(),

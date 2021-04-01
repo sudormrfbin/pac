@@ -10,7 +10,7 @@ lazy_static! {
 pub fn line() -> u16 {
     let mut v = MUTEX.lock().unwrap();
     let current = *v;
-    *v = *v + 1;
+    *v += 1;
     println!();
     current
 }
