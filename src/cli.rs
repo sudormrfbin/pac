@@ -5,6 +5,7 @@ pub fn build_cli() -> App<'static, 'static> {
         .about(clap::crate_description!())
         .author(clap::crate_authors!())
         .version(clap::crate_version!())
+        .setting(AppSettings::ColoredHelp)
         .subcommand(
             SubCommand::with_name("list")
                 .about("List installed packages")

@@ -2,6 +2,11 @@
 
 <!-- Based on https://keepachangelog.com/en/1.0.0/ -->
 
+## Unreleased
+
+### Added
+- Colored help
+
 ## 0.1.0
 
 ### Added

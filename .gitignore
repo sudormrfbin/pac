@@ -5,3 +5,5 @@
 .*.sw[opn]
 
 test.log
+
+/build/
