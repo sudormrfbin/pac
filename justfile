@@ -1,5 +1,8 @@
 # vim: ft=make
 
+list-commit-tags:
+	@echo feat fix build chore ci docs style refactor perf test
+
 install:
 	cargo build --release
 	cp {{justfile_directory()}}/target/release/pac ~/.local/bin/
