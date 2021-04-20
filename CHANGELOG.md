@@ -2,7 +2,7 @@
 
 <!-- Based on https://keepachangelog.com/en/1.0.0/ -->
 
-## Unreleased
+## 0.1.1
 
 ### Added
 - Colored help
