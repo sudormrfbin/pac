@@ -1,6 +1,6 @@
 [package]
 name = "pac"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Gokul Soumya"]
 description = "Package manager for vim/neovim"
 repository = "https://github.com/gokulsoumya/pac"
