@@ -30,3 +30,16 @@ gh-release:
 	gh release create {{version}} {{pac-targz}} -R gokulsoumya/pac \
 		--notes-file <(sed '/## [0-9]/,/## [0-9]/p' -n ../CHANGELOG.md | sed '1,2d; $d')
 	rm -r *
+
+version-bump newver:
+	#!/usr/bin/env bash
+	set -euxo pipefail
+	test "$(git branch --show-current)" = 'master'
+	test -z "$(git status --porcelain)" # dirty index
+	sed -i '0,/version/{s/version = "[^"]*"/version = "{{newver}}"/}' Cargo.toml
+	sed -i '/## Unreleased/a \\n## {{newver}}' CHANGELOG.md
+	cargo update
+	git add CHANGELOG.md Cargo.toml Cargo.lock
+	git commit -m 'build: Bump version to {{newver}}'
+	git tag v{{newver}}
+	git push origin v{{newver}}
