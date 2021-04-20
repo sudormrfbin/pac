@@ -1,10 +1,11 @@
-use crate::Result;
+use crate::{Error, Result};
 
 use git2::{self, Repository};
 use std::fs;
 use std::path::PathBuf;
 
-fn fetch(repo: &Repository, remote: &str) -> Result<()> {
+/// Fetch remote branches to local repo and return the default branch.
+fn fetch(repo: &Repository, remote: &str) -> Result<String> {
     let mut opts = git2::FetchOptions::new();
     opts.download_tags(git2::AutotagOption::All)
         .update_fetchhead(true);
@@ -12,15 +13,21 @@ fn fetch(repo: &Repository, remote: &str) -> Result<()> {
     let refspec = "refs/heads/*:refs/heads/*";
     let mut remote = repo.remote_anonymous(&remote)?;
     remote.fetch(&[refspec], Some(&mut opts), None)?;
-    Ok(())
+
+    remote
+        .default_branch()?
+        .as_str()
+        .ok_or(Error::Git(
+            "Default branch name is invalid utf-8".to_string(),
+        ))
+        .map(|s| s.to_string())
 }
 
 /// Fetch changes from remote for a local repo, hard reset HEAD
 /// and update submodules.
 fn sync_repo(repo: &Repository, remote: &str) -> Result<()> {
-    fetch(&repo, remote)?;
-    let reference = "HEAD";
-    let oid = repo.refname_to_id(reference)?;
+    let branch_ref = fetch(&repo, remote)?;
+    let oid = repo.refname_to_id(&branch_ref)?;
     let object = repo.find_object(oid, None)?;
     repo.reset(&object, git2::ResetType::Hard, None)?;
     update_submodules(&repo)?;

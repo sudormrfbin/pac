@@ -6,6 +6,7 @@
 
 ### Added
 - Colored help
+- Checkout the default branch when installing plugins (`master` may not be the default)
 
 ## 0.1.0
 
