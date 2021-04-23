@@ -169,24 +169,17 @@ _pac__list_commands() {
 }
 (( $+functions[_pac__move_commands] )) ||
 _pac__move_commands() {
-    local commands; commands=(
-        "PACKAGE:Package to move" \
-"CATEGORY:Category to move the package to" \
-    )
+    local commands; commands=("${(@f)$(pac list | cut -f1 -d' ')}")
     _describe -t commands 'pac move commands' commands "$@"
 }
 (( $+functions[_pac__uninstall_commands] )) ||
 _pac__uninstall_commands() {
-    local commands; commands=(
-        "PACKAGE:" \
-    )
+    local commands; commands=("${(@f)$(pac list | cut -f1 -d' ')}")
     _describe -t commands 'pac uninstall commands' commands "$@"
 }
 (( $+functions[_pac__update_commands] )) ||
 _pac__update_commands() {
-    local commands; commands=(
-        "PACKAGE:Packages to update, default all" \
-    )
+    local commands; commands=("${(@f)$(pac list | cut -f1 -d' ')}")
     _describe -t commands 'pac update commands' commands "$@"
 }
 
