@@ -1,4 +1,4 @@
-use crate::git::GitRepo;
+use crate::git::{GitReference, GitRepo};
 use crate::package::{self, Package};
 use crate::task::{TaskManager, TaskType};
 use crate::{Error, Result};
@@ -15,10 +15,18 @@ struct InstallArgs {
     opt: bool,
     category: String,
     build: Option<String>,
+    gitref: Option<GitReference>,
 }
 
 impl InstallArgs {
     fn from_matches(m: &ArgMatches) -> InstallArgs {
+        let mut gitref = None;
+        for reftype in &["tag", "branch", "commit"] {
+            if let Some(refval) = m.value_of(reftype) {
+                gitref = GitReference::new(reftype, refval).ok()
+            }
+        }
+
         InstallArgs {
             plugins: m.values_of_lossy("package").unwrap_or_default(),
             on: value_t!(m, "on", String).ok(),
@@ -28,6 +36,7 @@ impl InstallArgs {
             opt: m.is_present("opt"),
             category: value_t!(m, "category", String).unwrap_or_default(),
             build: value_t!(m, "build", String).ok(),
+            gitref,
         }
     }
 }
@@ -79,6 +88,7 @@ pub fn exec(matches: &ArgMatches) {
                 name: name.to_string(),
                 idname: Package::idname_from_remote(&remote),
                 remote,
+                reference: args.gitref.clone(),
                 category: args.category.clone(),
                 opt,
                 for_types: types.clone(),

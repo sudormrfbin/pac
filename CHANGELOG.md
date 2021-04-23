@@ -6,6 +6,7 @@
 
 ### Added
 - Colored help
+- Checkout a different branch, tag or commit upon plugin install (`--branch`, `--tag`, `--commit` arguments for install command)
 
 ## 0.1.0
 

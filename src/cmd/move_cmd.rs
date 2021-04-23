@@ -43,7 +43,9 @@ fn move_plugin(plugin: &str, category: &str, opt: bool) -> Result<()> {
             return Err(Error::plugin_not_installed(plugin));
         }
 
-        let path = package::Package::new(plugin, &pack.remote, category, opt).path();
+        let path =
+            package::Package::new(plugin, &pack.remote, pack.reference.clone(), category, opt)
+                .path();
         if origin_path != path {
             utils::copy_directory(&origin_path, &path)?;
             fs::remove_dir_all(&origin_path)?;
