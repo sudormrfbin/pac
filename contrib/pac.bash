@@ -105,7 +105,7 @@ _pac() {
             return 0
             ;;
         pac__install)
-            opts=" -o -h -V -c -j  --opt --help --version --category --as --on --for --build --threads  <package>... "
+            opts=" -o -h -V -c -j  --opt --help --version --category --branch --tag --commit --as --on --for --build --threads  <package>... "
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 return 0
@@ -118,6 +118,18 @@ _pac() {
                     ;;
                     -c)
                     COMPREPLY=("<CATEGORY>")
+                    return 0
+                    ;;
+                --branch)
+                    COMPREPLY=("<BRANCH>")
+                    return 0
+                    ;;
+                --tag)
+                    COMPREPLY=("<TAG>")
+                    return 0
+                    ;;
+                --commit)
+                    COMPREPLY=("<COMMIT_HASH>")
                     return 0
                     ;;
                 --as)

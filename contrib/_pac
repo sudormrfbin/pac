@@ -37,6 +37,9 @@ _arguments -s -S -C \
 _arguments -s -S -C \
 '-c+[Install package under provided category]' \
 '--category+[Install package under provided category]' \
+'(--tag --commit)--branch+[Checkout this branch by default]' \
+'--tag+[Checkout this tag by default]' \
+'--commit+[Checkout this commit by default]' \
 '--as+[Install plugin under this name]' \
 '--on+[Command for loading the plugins]' \
 '--for+[Load this plugins for specific types]' \
