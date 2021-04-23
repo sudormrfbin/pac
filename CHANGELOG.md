@@ -2,6 +2,12 @@
 
 <!-- Based on https://keepachangelog.com/en/1.0.0/ -->
 
+## Unreleased
+
+### Added
+
+- Checkout a different branch, tag or commit upon plugin install (`--branch`, `--tag`, `--commit` arguments for install command)
+
 ## 0.1.1
 
 ### Added

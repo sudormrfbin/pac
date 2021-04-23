@@ -55,6 +55,30 @@ pub fn build_cli() -> App<'static, 'static> {
                         .value_name("CATEGORY"),
                 )
                 .arg(
+                    Arg::with_name("branch")
+                        .long("branch")
+                        .help("Checkout this branch by default")
+                        .value_name("BRANCH")
+                        .conflicts_with_all(&["tag", "commit"]),
+                )
+                .arg(
+                    Arg::with_name("tag")
+                        .long("tag")
+                        .help("Checkout this tag by default")
+                        .value_name("TAG"),
+                )
+                .arg(
+                    Arg::with_name("commit")
+                        .long("commit")
+                        .help("Checkout this commit by default")
+                        .value_name("COMMIT_HASH")
+                        .validator(|commit| match commit.len() {
+                            40 => Ok(()),
+                            _ => Err("Invalid commit hash length, please provide the full hash"
+                                .to_string()),
+                        }),
+                )
+                .arg(
                     Arg::with_name("as")
                         .long("as")
                         .help("Install plugin under this name")
