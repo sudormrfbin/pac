@@ -65,16 +65,6 @@ impl GitReference {
     }
 }
 
-impl Default for GitReference {
-    /// Makes a [GitReference] with "master" as branch.
-    fn default() -> Self {
-        Self {
-            kind: GitRefKind::Branch,
-            value: "master".to_string(),
-        }
-    }
-}
-
 /// Fetch from a remote repo (branches and tags). Does not change working tree.
 /// Returns the default remote branch.
 fn fetch(repo: &Repository, remote: &str) -> Result<GitReference> {
