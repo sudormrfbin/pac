@@ -23,9 +23,9 @@ gh-release:
 	#!/usr/bin/env bash
 	set -euxo pipefail
 	cd build
-	cargo build --release --target-dir .
-	strip release/pac
-	cp release/pac .
+	cargo build --release
+	cp ../target/release/pac .
+	strip pac
 	tar cvzf {{pac-targz}} pac
 	gh release create {{version}} {{pac-targz}} -R gokulsoumya/pac \
 		--notes-file <(sed '/## [0-9]/,/## [0-9]/p' -n ../CHANGELOG.md | sed '1,2d; $d')
@@ -42,4 +42,5 @@ version-bump newver:
 	git add CHANGELOG.md Cargo.toml Cargo.lock
 	git commit -m 'build: Bump version to {{newver}}'
 	git tag v{{newver}}
+	git push origin
 	git push origin v{{newver}}
