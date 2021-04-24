@@ -44,7 +44,7 @@ lazy_static! {
 #[derive(Debug, Clone)]
 pub struct Package {
     /// Name of local directory where plugin is installed
-    /// Same as repo name of remote unless installed with --as
+    /// Default is same as repo name of remote unless installed with --as
     pub name: String,
     /// If remote is https://github.com/username/repo then idname
     /// is username/repo. Arguments to install, update, move, etc
@@ -54,8 +54,9 @@ pub struct Package {
     pub remote: String,
     /// The branch, tag, or commit to checkout described as a rev
     pub revision: Option<String>,
-    /// Install package under pack/<category>/
+    /// Install package under pack/<category>/. Default value is "default"
     pub category: String,
+    /// Whether to put this package under pack/*/opt. Default value is false.
     pub opt: bool,
     /// Load this package on this command
     pub load_command: Option<String>,
@@ -66,12 +67,7 @@ pub struct Package {
 }
 
 impl Package {
-    pub fn new(
-        name: &str,
-        remote: &str,
-        category: &str,
-        opt: bool,
-    ) -> Package {
+    pub fn new(name: &str, remote: &str, category: &str, opt: bool) -> Package {
         Package {
             name: name.to_string(),
             idname: Self::idname_from_remote(remote),
@@ -122,13 +118,16 @@ impl Package {
             .map(|s| s.to_string())
             .ok_or(Error::Format)?;
 
-        let revision = doc["rev"].as_str().map(|s| s.to_string());
-        let opt = doc["opt"].as_bool().unwrap_or(false);
         let category = doc["category"]
             .as_str()
             .map_or("default".to_string(), |s| s.to_string());
-        let cmd = doc["on"].as_str().map(|s| s.to_string());
-        let build = doc["build"].as_str().map(|s| s.to_string());
+
+        let opt = doc["opt"].as_bool().unwrap_or(false);
+
+        let get_val = |key: &str| doc[key].as_str().map(|s| s.to_string());
+        let revision = get_val("rev");
+        let cmd = get_val("on");
+        let build = get_val("build");
 
         let types = match doc["for"].as_vec() {
             Some(f) => {
@@ -157,27 +156,37 @@ impl Package {
     /// Convert Package to a list item to be added to `PAC_CONFIG_FILE`
     pub fn into_yaml(self) -> Yaml {
         let mut doc = Hash::new();
-        doc.insert(Yaml::from_str("remote"), Yaml::from_str(&self.remote));
 
-        if !self.remote.ends_with(&self.name) {
-            doc.insert(Yaml::from_str("name"), Yaml::from_str(&self.name));
+        macro_rules! yaml_insert {
+            ($key:ident) => {
+                doc.insert(Yaml::from_str(stringify!($key)), Yaml::from_str(&self.$key));
+            };
         }
 
+        yaml_insert!(remote);
+
+        if !self.remote.ends_with(&self.name) {
+            yaml_insert!(name);
+        }
         if self.category != "default" {
-            doc.insert(Yaml::from_str("category"), Yaml::from_str(&self.category));
+            yaml_insert!(category);
         }
         if self.opt {
             doc.insert(Yaml::from_str("opt"), Yaml::Boolean(self.opt));
         }
-        if let Some(ref c) = self.revision {
-            doc.insert(Yaml::from_str("rev"), Yaml::from_str(c));
+
+        macro_rules! yaml_opt_insert {
+            ($key:ident,$member:ident) => {
+                if let Some(ref c) = self.$member {
+                    doc.insert(Yaml::from_str(stringify!($key)), Yaml::from_str(c));
+                }
+            };
         }
-        if let Some(ref c) = self.load_command {
-            doc.insert(Yaml::from_str("on"), Yaml::from_str(c));
-        }
-        if let Some(ref c) = self.build_command {
-            doc.insert(Yaml::from_str("build"), Yaml::from_str(c));
-        }
+
+        yaml_opt_insert!(rev, revision);
+        yaml_opt_insert!(on, load_command);
+        yaml_opt_insert!(build, build_command);
+
         if !self.for_types.is_empty() {
             let types = self
                 .for_types
