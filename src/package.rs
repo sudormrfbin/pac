@@ -1,4 +1,4 @@
-use crate::git::{GitReference, GitRepo};
+use crate::git::GitRepo;
 use crate::{Error, Result};
 
 use std::env;
@@ -52,8 +52,8 @@ pub struct Package {
     pub idname: String,
     /// Remote url of the repo to git clone from
     pub remote: String,
-    /// The branch, tag, or commit to checkout
-    pub reference: Option<GitReference>,
+    /// The branch, tag, or commit to checkout described as a rev
+    pub revision: Option<String>,
     /// Install package under pack/<category>/
     pub category: String,
     pub opt: bool,
@@ -69,7 +69,6 @@ impl Package {
     pub fn new(
         name: &str,
         remote: &str,
-        reference: Option<GitReference>,
         category: &str,
         opt: bool,
     ) -> Package {
@@ -77,7 +76,7 @@ impl Package {
             name: name.to_string(),
             idname: Self::idname_from_remote(remote),
             remote: remote.to_string(),
-            reference,
+            revision: None,
             category: category.to_string(),
             opt,
             load_command: None,
@@ -121,17 +120,7 @@ impl Package {
             .map(|s| s.to_string())
             .ok_or(Error::Format)?;
 
-        let reference = match doc["ref"].as_hash() {
-            None => None,
-            Some(subdoc) => {
-                let (reftype, refval) = subdoc.iter().next().ok_or(Error::Format)?;
-                let to_str = |yaml: &Yaml| -> Result<String> {
-                    yaml.as_str().map(|s| s.to_string()).ok_or(Error::Format)
-                };
-                Some(GitReference::new(&to_str(reftype)?, &to_str(refval)?)?)
-            }
-        };
-
+        let revision = doc["rev"].as_str().map(|s| s.to_string());
         let opt = doc["opt"].as_bool().ok_or(Error::Format)?;
         let category = doc["category"]
             .as_str()
@@ -155,7 +144,7 @@ impl Package {
             name,
             idname: Self::idname_from_remote(&remote),
             remote,
-            reference,
+            revision,
             category,
             opt,
             load_command: cmd,
@@ -172,15 +161,9 @@ impl Package {
         doc.insert(Yaml::from_str("category"), Yaml::from_str(&self.category));
         doc.insert(Yaml::from_str("opt"), Yaml::Boolean(self.opt));
 
-        if let Some(ref gitref) = self.reference {
-            let mut subdoc = Hash::new();
-            subdoc.insert(
-                Yaml::from_str(&gitref.kind.to_string()),
-                Yaml::from_str(&gitref.value),
-            );
-            doc.insert(Yaml::from_str("ref"), Yaml::Hash(subdoc));
+        if let Some(ref c) = self.revision {
+            doc.insert(Yaml::from_str("rev"), Yaml::from_str(c));
         }
-
         if let Some(ref c) = self.load_command {
             doc.insert(Yaml::from_str("on"), Yaml::from_str(c));
         }
@@ -241,8 +224,8 @@ impl Package {
 }
 
 impl GitRepo for Package {
-    fn clone_info(&self) -> (&str, PathBuf, Option<GitReference>) {
-        (&self.remote, self.path(), self.reference.clone())
+    fn clone_info(&self) -> (&str, PathBuf, Option<String>) {
+        (&self.remote, self.path(), self.revision.clone())
     }
 }
 

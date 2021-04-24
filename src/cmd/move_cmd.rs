@@ -44,7 +44,7 @@ fn move_plugin(plugin: &str, category: &str, opt: bool) -> Result<()> {
         }
 
         let path =
-            package::Package::new(plugin, &pack.remote, pack.reference.clone(), category, opt)
+            package::Package::new(plugin, &pack.remote, category, opt)
                 .path();
         if origin_path != path {
             utils::copy_directory(&origin_path, &path)?;
