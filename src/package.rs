@@ -111,21 +111,22 @@ impl Package {
 
     /// Parse a Package from a single list item in `PAC_CONFIG_FILE`
     pub fn from_yaml(doc: &Yaml) -> Result<Package> {
-        let name = doc["name"]
-            .as_str()
-            .map(|s| s.to_string())
-            .ok_or(Error::Format)?;
         let remote = doc["remote"]
             .as_str()
             .map(|s| s.to_string())
             .ok_or(Error::Format)?;
 
-        let revision = doc["rev"].as_str().map(|s| s.to_string());
-        let opt = doc["opt"].as_bool().ok_or(Error::Format)?;
-        let category = doc["category"]
+        let name = doc["name"]
             .as_str()
+            .or_else(|| remote.rsplit('/').next())
             .map(|s| s.to_string())
             .ok_or(Error::Format)?;
+
+        let revision = doc["rev"].as_str().map(|s| s.to_string());
+        let opt = doc["opt"].as_bool().unwrap_or(false);
+        let category = doc["category"]
+            .as_str()
+            .map_or("default".to_string(), |s| s.to_string());
         let cmd = doc["on"].as_str().map(|s| s.to_string());
         let build = doc["build"].as_str().map(|s| s.to_string());
 
@@ -156,11 +157,18 @@ impl Package {
     /// Convert Package to a list item to be added to `PAC_CONFIG_FILE`
     pub fn into_yaml(self) -> Yaml {
         let mut doc = Hash::new();
-        doc.insert(Yaml::from_str("name"), Yaml::from_str(&self.name));
         doc.insert(Yaml::from_str("remote"), Yaml::from_str(&self.remote));
-        doc.insert(Yaml::from_str("category"), Yaml::from_str(&self.category));
-        doc.insert(Yaml::from_str("opt"), Yaml::Boolean(self.opt));
 
+        if !self.remote.ends_with(&self.name) {
+            doc.insert(Yaml::from_str("name"), Yaml::from_str(&self.name));
+        }
+
+        if self.category != "default" {
+            doc.insert(Yaml::from_str("category"), Yaml::from_str(&self.category));
+        }
+        if self.opt {
+            doc.insert(Yaml::from_str("opt"), Yaml::Boolean(self.opt));
+        }
         if let Some(ref c) = self.revision {
             doc.insert(Yaml::from_str("rev"), Yaml::from_str(c));
         }

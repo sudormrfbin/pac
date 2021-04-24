@@ -7,6 +7,7 @@
 ## Added
 
 - `--rev` flag which replaces `--branch` et. al for install command (uses revision strings)
+- Breaking change to config file (most fields are optional now)
 
 
 ## 0.1.2
