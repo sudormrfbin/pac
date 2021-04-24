@@ -4,6 +4,11 @@
 
 ## Unreleased
 
+## Added
+
+- `--rev` flag which replaces `--branch` et. al for install command (uses revision strings)
+
+
 ## 0.1.2
 
 ### Added
