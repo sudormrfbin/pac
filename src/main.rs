@@ -16,9 +16,8 @@ mod task;
 pub use error::{Error, Result};
 
 fn main() {
-    let _ = env::var("PACK_LOG_FILE").and_then(|x| {
-        simple_logging::log_to_file(x, log::LevelFilter::Info).expect("fail to init logging");
-        Ok(())
+    let _ = env::var("PACK_LOG_FILE").map(|x| {
+        simple_logging::log_to_file(x, log::LevelFilter::Info).expect("fail to init logging")
     });
 
     let app_m = cli::build_cli().get_matches();

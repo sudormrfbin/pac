@@ -19,7 +19,7 @@ fn fetch(repo: &Repository, remote: &str) -> Result<String> {
     remote
         .default_branch()?
         .as_str()
-        .ok_or(Error::Git(
+        .ok_or_else(|| Error::Git(
             "Default branch name is invalid utf-8".to_string(),
         ))
         // s is of the form "refs/heads/master" so split and use "master" only
